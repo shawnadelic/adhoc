@@ -6,7 +6,7 @@ config = {
             "node_count": 100,
             "width": 1000,
             "height": 1000,
-            "transmission_range": 200,
+            "transmission_range": 100,
             "min_energy": 5000000000,
             "max_energy": 5000000000,
             "packet_size": 512,

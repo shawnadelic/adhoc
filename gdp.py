@@ -6,49 +6,50 @@ class GDP(object):
         self.net = RandomAdHocNetwork(**kwargs)
         self.output_path = output_path
     def run(self):
-        self.all_requests = list(self.net.requests)
-        self.remaining_requests = list(self.net.requests)
-        self.satisfied_requests = []
-        self.request_solutions = []
-        total_energy = 0
-        net = self.net
-        self.beta = self.calculate_beta(net)
-        while self.remaining_requests:
-            #request = self.remaining_requests.pop()
-            #src, dest = request
+        if self.net.connected:
+            self.all_requests = list(self.net.requests)
+            self.remaining_requests = list(self.net.requests)
+            self.satisfied_requests = []
+            self.request_solutions = []
+            total_energy = 0
+            net = self.net
+            self.beta = self.calculate_beta(net)
+            while self.remaining_requests:
+                #request = self.remaining_requests.pop()
+                #src, dest = request
 
-            try:
-                min_request, min_path, min_path_value = self.minimum_weighted_path(net, self.remaining_requests)
-            except NetworkXNoPath:
-                print "Stopping, cannot satisfy any more requests"
-                break
+                try:
+                    min_request, min_path, min_path_value = self.minimum_weighted_path(net, self.remaining_requests)
+                except NetworkXNoPath:
+                    print "Stopping, cannot satisfy any more requests"
+                    break
 
-            min_energy = net.update_along_path(min_path)
-            net.prune_edges()
+                min_energy = net.update_along_path(min_path)
+                net.prune_edges()
 
-            self.remaining_requests.remove(min_request)
-            self.satisfied_requests.append(min_request)
-            self.request_solutions.append((min_request, min_path, min_energy))
+                self.remaining_requests.remove(min_request)
+                self.satisfied_requests.append(min_request)
+                self.request_solutions.append((min_request, min_path, min_energy))
 
-            #self.satisfied_requests.append((src, dest))
-            self.multiply_weight_along_path(net, min_path)
+                #self.satisfied_requests.append((src, dest))
+                self.multiply_weight_along_path(net, min_path)
 
-            total_energy += min_energy
+                total_energy += min_energy
 
-        if self.request_solutions:
-            print "Satisfied requests:"
-        for request, path, energy in self.request_solutions:
+            if self.request_solutions:
+                print "Satisfied requests:"
+            for request, path, energy in self.request_solutions:
+                print
+                print "Request: {} -> {}".format(request[0], request[1])
+                if self.output_path is True:
+                    print "Path: {}".format(" -> ".join(path))
+                print "Energy Consumed: {}".format(energy)
+     
+            #self.net.raw(requests=self.satisfied_requests)
             print
-            print "Request: {} -> {}".format(request[0], request[1])
-            if self.output_path is True:
-                print "Path: {}".format(" -> ".join(path))
-            print "Energy Consumed: {}".format(energy)
- 
-        #self.net.draw(requests=self.satisfied_requests)
-        print
-        print "**************************************************************************************"
-        print "Total Requests Satisfied: {}".format(len(self.satisfied_requests))
-        print "Total Energy Consumed: {}".format(total_energy)
+            print "**************************************************************************************"
+            print "Total Requests Satisfied: {}".format(len(self.satisfied_requests))
+            print "Total Energy Consumed: {}".format(total_energy)
 
     def minimum_weighted_path(self, net, requests):
         min_path = None
@@ -78,9 +79,10 @@ class GDP(object):
         return beta
 
     def draw(self, output_file=None, requests=None):
-        if requests is None:
-            requests = self.satisfied_requests
-        self.net.draw(output_file=output_file, requests=requests)
+        if self.net.connected:
+            if requests is None:
+                requests = self.satisfied_requests
+            self.net.draw(output_file=output_file, requests=requests)
 
 if __name__ == "__main__":
     gdp = GDP()

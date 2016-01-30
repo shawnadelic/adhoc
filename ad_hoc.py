@@ -30,7 +30,10 @@ class RandomAdHocNetwork(nx.DiGraph):
         self._generate_requests()
         
         if not self.is_connected():
+            self.connected = False
             print("Error: graph is not connected")
+        else:
+            self.connected = True
 
     @staticmethod
     def _formatted_name(node):

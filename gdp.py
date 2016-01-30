@@ -15,6 +15,7 @@ class GDP(object):
             net = self.net
             self.beta = self.calculate_beta(net)
             while self.remaining_requests:
+                net.prune_edges()
                 #request = self.remaining_requests.pop()
                 #src, dest = request
 
@@ -25,7 +26,6 @@ class GDP(object):
                     break
 
                 min_energy = net.update_along_path(min_path)
-                net.prune_edges()
 
                 self.remaining_requests.remove(min_request)
                 self.satisfied_requests.append(min_request)

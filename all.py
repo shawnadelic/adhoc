@@ -7,12 +7,12 @@ config = {
             "width": 1000,
             "height": 1000,
             "transmission_range": 200,
-            "min_energy": 5,
-            "max_energy": 5,
+            "min_energy": 1,
+            "max_energy": 1,
             "packet_size": 512,
-            "number_of_requests": 20,
+            "number_of_requests": 100,
             "seed": 0,
-            "output_path": True,
+            "output_path": False,
 }
 
 # Convert joules to nanojoules
@@ -20,6 +20,10 @@ config = {
 
 config["min_energy"] *= 1000000000
 config["max_energy"] *= 1000000000
+
+# Convert bits to bytes
+# 1 byte = 8 bits
+config["packet_size"] *= 8
 
 oml = OML(**config)
 mecbe = MECBE(**config)

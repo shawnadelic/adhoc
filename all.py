@@ -6,14 +6,20 @@ config = {
             "node_count": 100,
             "width": 1000,
             "height": 1000,
-            "transmission_range": 100,
-            "min_energy": 5000000000,
-            "max_energy": 5000000000,
+            "transmission_range": 200,
+            "min_energy": 5,
+            "max_energy": 5,
             "packet_size": 512,
             "number_of_requests": 20,
             "seed": 0,
             "output_path": True,
 }
+
+# Convert joules to nanojoules
+# 1 joule = 1,000,000,000 nanojoules
+
+config["min_energy"] *= 1000000000
+config["max_energy"] *= 1000000000
 
 oml = OML(**config)
 mecbe = MECBE(**config)

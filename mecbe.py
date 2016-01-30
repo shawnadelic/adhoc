@@ -47,13 +47,12 @@ class MECBE(object):
             print "Total Energy Consumed: {}".format(total_energy)
 
     def minimum_metric_path(self, net, src, dest):
-        temp = net.copy()
-        for edge in temp.edges():
+        for edge in net.edges():
             temp_src, temp_dest = edge
-            if temp[temp_src][temp_dest]["type"] == "external":
-                temp[temp_src][temp_dest]["metric"] = 1/temp.node[temp_src]["energy"]
+            if net[temp_src][temp_dest]["type"] == "external":
+                net[temp_src][temp_dest]["metric"] = 1/net.node[temp_src]["energy"]
             else:
-                temp[temp_src][temp_dest]["metric"] = 0
+                net[temp_src][temp_dest]["metric"] = 0
 
         shortest_path = net.shortest_path(src, dest, weight="metric")
 

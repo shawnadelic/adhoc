@@ -31,7 +31,6 @@ class GDP(object):
                 self.satisfied_requests.append(min_request)
                 self.request_solutions.append((min_request, min_path, min_energy))
 
-                #self.satisfied_requests.append((src, dest))
                 self.multiply_weight_along_path(net, min_path)
 
                 total_energy += min_energy
@@ -52,6 +51,8 @@ class GDP(object):
             print "Total Energy Consumed: {}".format(total_energy)
 
     def minimum_weighted_path(self, net, requests):
+        path = None
+        path_value = None
         min_path = None
         min_request = None
         min_path_value = None
@@ -66,6 +67,9 @@ class GDP(object):
                 min_path_value = path_value
                 min_request = (src, dest)
 
+        if min_path is None:
+            raise NetworkXNoPath
+
         return (min_request, min_path, min_path_value)
 
     def multiply_weight_along_path(self, net, path):
@@ -73,9 +77,9 @@ class GDP(object):
             net[path[index]][path[index+1]]["weight"] *= self.beta
 
     def calculate_beta(self, net):
-        epsilon = (net.min_energy + net.max_energy) / float(2)
+        epsilon = (net.min_energy + net.max_energy) / (float(2) * 1000000000)
         m = len(net.edges())
-        beta = m ** (float(1) / (epsilon + 1) )
+        beta = m ** (float(1)/ (epsilon + 1) )
         return beta
 
     def draw(self, output_file=None, requests=None):

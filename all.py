@@ -15,6 +15,8 @@ config = {
             "output_path": False,
 }
 
+plot_info = "{requests}-requests".format(requests=config["number_of_requests"])
+
 # Convert joules to nanojoules
 # 1 joule = 1,000,000,000 nanojoules
 
@@ -33,16 +35,16 @@ print "*************************************************************************
 print "Running OML"
 print "**************************************************************************************"
 oml.run()
-oml.draw(output_file="plot-oml.svg")
+oml.draw(output_file="plot-oml-" + plot_info + ".svg")
 print
 print "**************************************************************************************"
 print "Running MECBE"
 print "**************************************************************************************"
 mecbe.run()
-mecbe.draw(output_file="plot-mecbe.svg")
+mecbe.draw(output_file="plot-mecbe-" + plot_info + ".svg")
 print
 print "**************************************************************************************"
 print "Running GDP"
 print "**************************************************************************************"
 gdp.run()
-gdp.draw(output_file="plot-gdp.svg")
+gdp.draw(output_file="plot-gdp-" + plot_info + ".svg")

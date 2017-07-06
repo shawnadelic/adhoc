@@ -8,10 +8,10 @@ logging.basicConfig(level=logging.ERROR, format="%(message)s")
 
 class RandomAdHocNetwork(nx.DiGraph):
     figure_counter = 0
-    
+
     def __init__(self, node_count=100, width=1000, height=1000,
-            transmission_range=200, min_energy=5000000000, max_energy=5000000000,
-            packet_size=512, seed=None, number_of_requests = 10):
+                 transmission_range=200, min_energy=5000000000, max_energy=5000000000,
+                 packet_size=512, seed=None, number_of_requests=10):
         super(RandomAdHocNetwork, self).__init__()
         random.seed(seed)
         self.node_count = node_count
@@ -28,12 +28,20 @@ class RandomAdHocNetwork(nx.DiGraph):
         self._generate_random_nodes()
         self._calculate_neighbors()
         self._generate_requests()
-        
+
         if not self.is_connected():
             self.connected = False
             print("Error: graph is not connected")
         else:
             self.connected = True
+
+    def depleted_nodes(self):
+        depleted_node_count = 0
+        for node in self.nodes():
+            if self.node[node]["type"] == "out":
+                if len(self[node]) == 0:
+                    depleted_node_count += 1
+        return depleted_node_count
 
     @staticmethod
     def _formatted_name(node):
@@ -92,8 +100,8 @@ class RandomAdHocNetwork(nx.DiGraph):
         for i in range(n):
             self.requests.append(self._generate_request())
 
-    def _calculate_energy_cost(self, distance): 
-        # Energy consumption measured by 
+    def _calculate_energy_cost(self, distance):
+        # Energy consumption measured by
         # E(T) = E(elec)*k + e(amp)*k*l^2
         # E(elec) = 50 nJ/bit
         # e(amp) = 100pJ/bit/m^2 = 0.1nJ/bit/m^2
@@ -116,10 +124,10 @@ class RandomAdHocNetwork(nx.DiGraph):
             in_node = "{} in".format(n)
             out_node = "{} out".format(n)
             initial_energy = random.uniform(self.min_energy,
-                self.max_energy)
+                                            self.max_energy)
             self.add_node(in_node, id=n, type="in", x=xcoord, y=ycoord)
             self.add_node(out_node, id=n, type="out", x=xcoord,
-                y=ycoord, energy=initial_energy)
+                          y=ycoord, energy=initial_energy)
 
     def shortest_path(self, src, dest, weight="cost"):
         return nx.shortest_path(self, src, dest, weight=weight)
@@ -129,7 +137,7 @@ class RandomAdHocNetwork(nx.DiGraph):
 
     def _get_random_node(self):
         return (random.randint(0, self.width), random.randint(0,
-            self.height))
+                                                              self.height))
 
     def update_along_path(self, path):
         total_energy = 0
@@ -138,10 +146,11 @@ class RandomAdHocNetwork(nx.DiGraph):
             dest = path[index + 1]
             if self[src][dest]["type"] == "external":
                 total_energy += self.cost(src, dest)
-                self.set_energy(src, self.get_energy(src) - self.cost(src, dest))
+                self.set_energy(
+                    src, self.get_energy(src) - self.cost(src, dest))
         return total_energy
 
-    def prune_edges(self, threshold = None):
+    def prune_edges(self, threshold=None):
         for src, dest in self.external_edges():
             edge = self[src][dest]
             if threshold is None:
@@ -149,8 +158,10 @@ class RandomAdHocNetwork(nx.DiGraph):
             else:
                 edge_threshold = max(threshold, self.cost(src, dest))
             if self.node[src]["energy"] < edge_threshold:
-                logging.debug("Node -> {} :: Energy -> {} :: Threshold -> {} ".format(src, self.node[src]["energy"], edge_threshold))
-                logging.debug("Removing edge {} -> {} : {}".format(src, dest, edge))
+                logging.debug("Node -> {} :: Energy -> {} :: Threshold -> {} ".format(
+                    src, self.node[src]["energy"], edge_threshold))
+                logging.debug(
+                    "Removing edge {} -> {} : {}".format(src, dest, edge))
                 self.remove_edge(src, dest)
 
     def cost(self, src, dest):
@@ -161,8 +172,8 @@ class RandomAdHocNetwork(nx.DiGraph):
         try:
             return edge["cost"]
         except KeyError:
-            raise KeyError("No cost set for edge from {} to {}".format(src, dest))
-
+            raise KeyError(
+                "No cost set for edge from {} to {}".format(src, dest))
 
     def weight(self, src, dest):
         try:
@@ -172,7 +183,8 @@ class RandomAdHocNetwork(nx.DiGraph):
         try:
             return edge["weight"]
         except KeyError:
-            raise KeyError("No weight set for edge from {} to {}".format(src, dest))
+            raise KeyError(
+                "No weight set for edge from {} to {}".format(src, dest))
 
     def _calculate_neighbors(self):
         for out_node in self.out_nodes():
@@ -182,11 +194,11 @@ class RandomAdHocNetwork(nx.DiGraph):
                 if (distance <= self.transmission_range and
                         (in_node.split()[0] != out_node.split()[0])):
                     self.add_edge(out_node, in_node, distance=distance,
-                    weight=cost, cost=cost, type="external")
+                                  weight=cost, cost=cost, type="external")
         for in_node in self.in_nodes():
             out_node = in_node.split()[0] + " out"
             self.add_edge(in_node, out_node, distance=0, weight=0,
-            cost=0, type="internal")
+                          cost=0, type="internal")
 
     def distance_between(self, src, dest):
         x1 = self.node[src]["x"]
@@ -215,12 +227,12 @@ class RandomAdHocNetwork(nx.DiGraph):
         if nodes:
             for node in sorted(self.nodes()):
                 print("Node {node}:  {info}".
-                    format(node=self._formatted_name(node), info=self.node[node]))
+                      format(node=self._formatted_name(node), info=self.node[node]))
         if edges:
             for edge in sorted(self.edges()):
                 src, dest = edge
                 print("Edge {src} -> {dest}: {info}"
-                    .format(src=src, dest=dest, info=self[src][dest]))
+                      .format(src=src, dest=dest, info=self[src][dest]))
 
     def is_connected(self):
         """
@@ -235,7 +247,7 @@ class RandomAdHocNetwork(nx.DiGraph):
         return nx.is_connected(temp)
 
     def draw(self, output_file=None, requests=None):
-        plt.figure(random.randint(0,1000000))
+        plt.figure(random.randint(0, 1000000))
         colors = {
             "out": "c",
             "in": "m",
@@ -249,15 +261,15 @@ class RandomAdHocNetwork(nx.DiGraph):
             edge_type = self.node[src]["type"]
             color = colors[edge_type]
             plt.plot([self.node[src]["x"], self.node[dest]["x"] +
-                self.x_offset], [self.node[src]["y"], self.node[dest]["y"]
-                + self.y_offset], color=color)
+                      self.x_offset], [self.node[src]["y"], self.node[dest]["y"]
+                                       + self.y_offset], color=color)
         if requests:
             for r in requests:
                 src, dest = r
                 color = "g"
                 plt.plot([self.node[src]["x"], self.node[dest]["x"] +
-                    self.x_offset], [self.node[src]["y"], self.node[dest]["y"]
-                    + self.y_offset], color=color)
+                          self.x_offset], [self.node[src]["y"], self.node[dest]["y"]
+                                           + self.y_offset], color=color)
 
         if output_file:
             plt.savefig(output_file)
